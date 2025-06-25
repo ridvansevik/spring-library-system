@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${book.id == null} ? 'Yeni Kitap Ekle' : 'Kitabı Düzenle'"></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-color: #212529;
+        }
+        .form-container {
+            max-width: 600px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container form-container">
+    <div class="card shadow-lg">
+        <div class="card-body p-5">
+            <h1 class="card-title text-center mb-4" th:text="${book.id == null} ? 'Yeni Kitap Ekle' : 'Kitabı Düzenle'">Form Başlığı</h1>
+
+            <form th:object="${book}"
+                  th:action="${book.id == null} ? @{/web/books/save} : @{/web/books/update/{id}(id=${book.id})}"
+                  method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <input type="hidden" th:if="${book.id != null}" th:field="*{id}" />
+
+                <div class="mb-3">
+                    <label for="title" class="form-label">Kitap Adı:</label>
+                    <input type="text" id="title" class="form-control" th:field="*{title}" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="author" class="form-label">Yazar:</label>
+                    <input type="text" id="author" class="form-control" th:field="*{author}" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="isbn" class="form-label">ISBN:</label>
+                    <input type="text" id="isbn" class="form-control" th:field="*{isbn}">
+                </div>
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                    <a th:href="@{/web/books}" class="btn btn-outline-secondary">İptal</a>
+                    <button type="submit" class="btn btn-primary">Kaydet</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
