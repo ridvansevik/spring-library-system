@@ -5,6 +5,8 @@ import com.ridvansevik.library_app.model.Book;
 import com.ridvansevik.library_app.service.BookService;
 import lombok.RequiredArgsConstructor;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
@@ -20,9 +22,9 @@ public class BookController {
 private final BookService bookService;
 
 @GetMapping
-public List<Book> getAllBooks(@RequestParam(required = false)String keyword)
+public Page<Book> getAllBooks(@RequestParam(required = false)String keyword, Pageable pageable)
 {
-return bookService.searchBook(keyword);
+return bookService.searchBooks(keyword,pageable);
 
 }
 

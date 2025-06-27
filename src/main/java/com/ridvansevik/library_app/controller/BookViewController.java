@@ -5,6 +5,8 @@ import com.ridvansevik.library_app.model.Book;
 import com.ridvansevik.library_app.service.BookService;
 import com.ridvansevik.library_app.service.LoanService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -22,20 +24,25 @@ public class BookViewController {
     private final LoanService loanService;
 
     @GetMapping("/books")
-    public String getAllBooks(@RequestParam(required = false)String keyword, Model model , Principal principal){
+    public String getAllBooks(@RequestParam(required = false)String keyword, Model model , Principal principal, Pageable pageable){
 
         if(principal != null){
             model.addAttribute("username", principal.getName());
         }
 
-        List<Book> books= bookService.searchBook(keyword);
+        Page<Book> books= bookService.searchBooks(keyword,pageable);
 
         Map<Long,String> borrowersMap = loanService.findActiveLoans().stream()
                         .collect(Collectors.toMap(loan -> loan.getBook().getId(),loan -> loan.getUser().getUsername()));
 
+        String sortParams = pageable.getSort().stream()
+                        .map(order -> order.getProperty() + "," + order.getDirection().name().toLowerCase())
+                                .collect(Collectors.joining());
+
         model.addAttribute("books",books);
         model.addAttribute("borrowersMap", borrowersMap);
         model.addAttribute("keyword",keyword);
+        model.addAttribute("sortParams",sortParams);
         return "books";
     }
 

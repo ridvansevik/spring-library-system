@@ -4,8 +4,10 @@ import com.ridvansevik.library_app.exception.ResourceNotFoundException;
 import com.ridvansevik.library_app.model.Book;
 import com.ridvansevik.library_app.repository.BookRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
+import com.ridvansevik.library_app.repository.LoanRepository;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,7 +19,7 @@ import java.util.Optional;
 public class BookService {
 
     private final BookRepository bookRepository;
-
+    private final LoanRepository loanRepository;
     /**
      * Retrieves all books from the database.
      *
@@ -76,17 +78,22 @@ public class BookService {
      * @throws ResourceNotFoundException if no book with the given ID is found.
      */
     public void deleteBook(long id) {
-        // Before attempting to delete, check if the book exists to provide a clear error message.
         if (!bookRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Cannot delete. Book not found with id: " + id);
+            throw new ResourceNotFoundException("Silme işlemi başarısız: " + id + " ID'li kitap bulunamadı.");
         }
+
+        if (loanRepository.existsByBookId(id)) {
+            throw new IllegalStateException("Bu kitap şuan birisi tarafından ödünç alınmış halde, silinemez.");
+        }
+
         bookRepository.deleteById(id);
     }
 
-    public List<Book> searchBook(String keyword){
-        if(keyword==null || keyword.trim().isEmpty()){
-            return bookRepository.findAll();
+
+    public Page<Book> searchBooks(String keyword, Pageable pageable) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return bookRepository.findAll(pageable);
         }
-        return bookRepository.findByTitleContainingIgnoreCaseOrAuthorContainingIgnoreCase(keyword,keyword);
+        return bookRepository.findByTitleContainingIgnoreCaseOrAuthorContainingIgnoreCase(keyword, keyword, pageable);
     }
 }
