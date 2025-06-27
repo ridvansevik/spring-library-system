@@ -23,6 +23,12 @@
             <a th:href="@{/web/register}" class="btn btn-outline-secondary">Kayıt Ol</a>
         </div>
     </div>
+    <form th:action="@{/web/books}" method="get" class="mb-4">
+        <div class="input-group">
+            <input type="text" name="keyword" th:value="${keyword}" class="form-control" placeholder="Kitap adı veya yazar girin...">
+            <button type="submit" class="btn btn-info">Ara</button>
+        </div>
+    </form>
     <div sec:authorize="hasRole('ADMIN')" class="mb-3">
         <a th:href="@{/web/books/new}" class="btn btn-primary shadow-sm">Yeni Kitap Ekle</a>
     </div>
