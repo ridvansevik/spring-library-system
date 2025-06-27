@@ -1,6 +1,7 @@
 package com.ridvansevik.library_app.service;
 
 import com.ridvansevik.library_app.dto.RegisterDto;
+import com.ridvansevik.library_app.exception.UsernameAlreadyExistsException;
 import com.ridvansevik.library_app.model.User;
 import com.ridvansevik.library_app.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +30,7 @@ public class AuthService {
 
         // Check if a user with the given username already exists to prevent duplicates.
         userRepository.findByUsername(registerDto.getUsername()).ifPresent(user -> {
-            throw new IllegalStateException(String.format("Username '%s' is already taken.", registerDto.getUsername()));
+            throw new UsernameAlreadyExistsException(registerDto.getUsername());
         });
 
         // Encode the user's plain-text password for secure storage.

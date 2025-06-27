@@ -2,6 +2,7 @@ package com.ridvansevik.library_app.controller;
 
 
 import com.ridvansevik.library_app.dto.RegisterDto;
+import com.ridvansevik.library_app.exception.UsernameAlreadyExistsException;
 import com.ridvansevik.library_app.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -63,7 +64,7 @@ public class AuthViewController {
         try{
             // Attempt to register the user via the service layer.
             authService.register(registerDto);
-        } catch (IllegalStateException e){
+        } catch (UsernameAlreadyExistsException e){
             // If the service throws an error (e.g., username exists), show it on the form.
             model.addAttribute("errorMessage", e.getMessage());
             return "register";

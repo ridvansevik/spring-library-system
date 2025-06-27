@@ -1,5 +1,6 @@
 package com.ridvansevik.library_app.service;
 
+import com.ridvansevik.library_app.exception.BookIsOnLoanException;
 import com.ridvansevik.library_app.exception.ResourceNotFoundException;
 import com.ridvansevik.library_app.model.Book;
 import com.ridvansevik.library_app.repository.BookRepository;
@@ -83,7 +84,7 @@ public class BookService {
         }
 
         if (loanRepository.existsByBookId(id)) {
-            throw new IllegalStateException("Bu kitap şuan birisi tarafından ödünç alınmış halde, silinemez.");
+            throw new BookIsOnLoanException(id);
         }
 
         bookRepository.deleteById(id);
