@@ -72,4 +72,6 @@ public class LoanService {
     public List<Loan> findActiveLoans() {
         return loanRepository.findByReturnDateIsNull();
     }
+
+    public List<Loan> findLoansByUsername(String username) { return loanRepository.findByUser_Username(username); }
 }
