@@ -1,9 +1,6 @@
 package com.ridvansevik.library_app.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -23,5 +20,10 @@ public class Book {
     @NotBlank(message = "Yazar alanı boş olamaz")
     private String author;
     private String isbn;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private BookStatus bookStatus=BookStatus.AVAILABLE;
+
 
 }
