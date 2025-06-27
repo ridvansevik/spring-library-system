@@ -9,6 +9,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -21,17 +22,20 @@ public class BookViewController {
     private final LoanService loanService;
 
     @GetMapping("/books")
-    public String getAllBooks(Model model , Principal principal){
+    public String getAllBooks(@RequestParam(required = false)String keyword, Model model , Principal principal){
 
         if(principal != null){
             model.addAttribute("username", principal.getName());
         }
 
+        List<Book> books= bookService.searchBook(keyword);
+
         Map<Long,String> borrowersMap = loanService.findActiveLoans().stream()
                         .collect(Collectors.toMap(loan -> loan.getBook().getId(),loan -> loan.getUser().getUsername()));
 
-        model.addAttribute("books",bookService.getAllBooks());
+        model.addAttribute("books",books);
         model.addAttribute("borrowersMap", borrowersMap);
+        model.addAttribute("keyword",keyword);
         return "books";
     }
 
