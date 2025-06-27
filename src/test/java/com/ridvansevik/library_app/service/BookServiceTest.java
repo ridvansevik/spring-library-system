@@ -1,6 +1,7 @@
 package com.ridvansevik.library_app.service;
 
 import com.ridvansevik.library_app.model.Book;
+import com.ridvansevik.library_app.model.BookStatus;
 import com.ridvansevik.library_app.repository.BookRepository;
 import com.ridvansevik.library_app.exception.ResourceNotFoundException;
 import org.junit.jupiter.api.Test;
@@ -28,8 +29,8 @@ class BookServiceTest {
     @Test
     void createBook_shouldSaveAndReturnBook() {
         // Hazırlık (Arrange)
-        Book bookToSave = new Book(null, "Test Başlık", "Test Yazar", "12345");
-        Book savedBook = new Book(1L, "Test Başlık", "Test Yazar", "12345");
+        Book bookToSave = new Book(null, "Test Başlık", "Test Yazar", "12345", BookStatus.AVAILABLE);
+        Book savedBook = new Book(1L, "Test Başlık", "Test Yazar", "12345",BookStatus.AVAILABLE);
         when(bookRepository.save(bookToSave)).thenReturn(savedBook);
 
         // Eylem (Act)
@@ -77,9 +78,9 @@ class BookServiceTest {
         // 1. HAZIRLIK (Arrange)
         long bookId = 1L;
         // Güncelleme için kullanılacak yeni bilgileri içeren nesne
-        Book updatedDetails = new Book(null, "Yeni Başlık", "Yeni Yazar", "54321");
+        Book updatedDetails = new Book(null, "Yeni Başlık", "Yeni Yazar", "54321",BookStatus.AVAILABLE);
         // Veritabanında varmış gibi davranacak mevcut kitap nesnesi
-        Book existingBook = new Book(bookId, "Eski Başlık", "Eski Yazar", "12345");
+        Book existingBook = new Book(bookId, "Eski Başlık", "Eski Yazar", "12345",BookStatus.AVAILABLE);
 
         // Mockito'ya talimat veriyoruz:
         // "bookRepository.findById(1L) metodu çağrıldığında, sanki veritabanında
@@ -109,7 +110,7 @@ class BookServiceTest {
     void updateBook_whenBookNotFound_shouldThrowResourceNotFoundException() {
         // 1. HAZIRLIK (Arrange)
         long nonExistentBookId = 99L;
-        Book updatedDetails = new Book(null, "Yeni Başlık", "Yeni Yazar", "54321");
+        Book updatedDetails = new Book(null, "Yeni Başlık", "Yeni Yazar", "54321",BookStatus.AVAILABLE);
 
         // Mockito'ya talimat veriyoruz:
         // "bookRepository.findById(99L) metodu çağrıldığında, sanki veritabanında
@@ -133,8 +134,8 @@ class BookServiceTest {
     void getAllBooks_shouldReturnListOfAllBooks() {
         // 1. HAZIRLIK (Arrange)
         // Repository'den dönmesini beklediğimiz sahte kitap listesini oluşturuyoruz.
-        Book book1 = new Book(1L, "Kitap 1", "Yazar 1", "111");
-        Book book2 = new Book(2L, "Kitap 2", "Yazar 2", "222");
+        Book book1 = new Book(1L, "Kitap 1", "Yazar 1", "111",BookStatus.AVAILABLE);
+        Book book2 = new Book(2L, "Kitap 2", "Yazar 2", "222",BookStatus.AVAILABLE);
         List<Book> expectedBooks = Arrays.asList(book1, book2);
 
         // Mockito'ya talimat veriyoruz:
@@ -161,7 +162,7 @@ class BookServiceTest {
     void getBookById_whenBookExists_shouldReturnOptionalOfBook() {
         // 1. HAZIRLIK (Arrange)
         long bookId = 1L;
-        Book expectedBook = new Book(bookId, "Test Kitabı", "Test Yazarı", "12345");
+        Book expectedBook = new Book(bookId, "Test Kitabı", "Test Yazarı", "12345",BookStatus.AVAILABLE);
 
         // Mockito'ya talimat veriyoruz:
         // "bookRepository.findById(1L) metodu çağrıldığında, 'expectedBook' nesnesini
