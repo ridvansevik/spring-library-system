@@ -12,4 +12,5 @@ Optional<Loan> findByBookIdAndReturnDateIsNull(Long bookId);
     List<Loan> findByReturnDateIsNull();
     boolean existsByBookId(Long bookId);
 
+    List<Loan> findByUser_Username(String username);
 }
