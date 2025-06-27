@@ -82,4 +82,11 @@ public class BookService {
         }
         bookRepository.deleteById(id);
     }
+
+    public List<Book> searchBook(String keyword){
+        if(keyword==null || keyword.trim().isEmpty()){
+            return bookRepository.findAll();
+        }
+        return bookRepository.findByTitleContainingIgnoreCaseOrAuthorContainingIgnoreCase(keyword,keyword);
+    }
 }
