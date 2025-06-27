@@ -10,5 +10,6 @@ public interface LoanRepository extends JpaRepository<Loan,Long> {
 
 Optional<Loan> findByBookIdAndReturnDateIsNull(Long bookId);
     List<Loan> findByReturnDateIsNull();
+    boolean existsByBookId(Long bookId);
 
 }
