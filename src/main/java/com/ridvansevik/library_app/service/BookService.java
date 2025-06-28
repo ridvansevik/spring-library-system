@@ -88,7 +88,7 @@ public class BookService {
             throw new ResourceNotFoundException("Silme işlemi başarısız: " + id + " ID'li kitap bulunamadı.");
         }
 
-        if (loanRepository.existsByBookId(id)) {
+        if (loanRepository.findByBookIdAndReturnDateIsNull(id).isPresent()) {
             throw new BookIsOnLoanException(id);
         }
 
