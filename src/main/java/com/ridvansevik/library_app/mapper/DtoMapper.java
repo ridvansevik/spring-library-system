@@ -44,6 +44,7 @@ public LoanDto toLoanDto(Loan loan){
     loanDto.setLoanDate(loan.getLoanDate());
     loanDto.setDueDate(loan.getDueDate());
     loanDto.setReturnDate(loan.getReturnDate());
+    loanDto.setFineAmount(loan.getFineAmount());
     return loanDto;
 }
 
@@ -64,4 +65,6 @@ public LoanDto toLoanDto(Loan loan){
         dto.setIsbn(book.getIsbn());
         return dto;
     }
+
+
 }
