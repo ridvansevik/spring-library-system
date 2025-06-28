@@ -2,6 +2,7 @@ package com.ridvansevik.library_app.controller;
 
 
 import com.ridvansevik.library_app.dto.RegisterDto;
+import com.ridvansevik.library_app.exception.UsernameAlreadyExistsException;
 import com.ridvansevik.library_app.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +37,7 @@ public class AuthController {
             authService.register(registerDto);
             // On success, return 200 OK with a message
             return ResponseEntity.ok("Kullanıcı başarıyla kaydedildi.");
-        } catch (IllegalStateException e){
+        } catch (UsernameAlreadyExistsException e){
             // If a known error occurs (e.g., user already exists), return 409 Conflict
             return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
         }
