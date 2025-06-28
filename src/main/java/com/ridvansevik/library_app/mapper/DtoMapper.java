@@ -1,6 +1,7 @@
 package com.ridvansevik.library_app.mapper;
 
 import com.ridvansevik.library_app.dto.BookDto;
+import com.ridvansevik.library_app.dto.CreateUpdateBookDto;
 import com.ridvansevik.library_app.dto.LoanDto;
 import com.ridvansevik.library_app.dto.UserDto;
 import com.ridvansevik.library_app.model.Book;
@@ -45,4 +46,14 @@ public LoanDto toLoanDto(Loan loan){
     loanDto.setReturnDate(loan.getReturnDate());
     return loanDto;
 }
+
+    public Book toBookEntity(CreateUpdateBookDto dto) {
+        if (dto == null) return null;
+        Book book = new Book();
+        book.setTitle(dto.getTitle());
+        book.setAuthor(dto.getAuthor());
+        book.setIsbn(dto.getIsbn());
+        return book;
+    }
+
 }
