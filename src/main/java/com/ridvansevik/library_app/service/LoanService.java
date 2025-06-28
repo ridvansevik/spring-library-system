@@ -1,6 +1,8 @@
 package com.ridvansevik.library_app.service;
 
 
+import com.ridvansevik.library_app.exception.ActiveLoanNotFoundException;
+import com.ridvansevik.library_app.exception.BookAlreadyBorrowedException;
 import com.ridvansevik.library_app.exception.ResourceNotFoundException;
 import com.ridvansevik.library_app.model.*;
 import com.ridvansevik.library_app.repository.BookRepository;
@@ -28,7 +30,7 @@ public class LoanService {
 
 
         if(book.getBookStatus() == BookStatus.BORROWED){
-            throw new IllegalStateException("Bu kitap zaten alınmış");
+            throw new BookAlreadyBorrowedException(bookId);
         }
 
         User user = userRepository.findByUsername(username)
@@ -50,7 +52,7 @@ public class LoanService {
 
 
         Loan loan = loanRepository.findByBookIdAndReturnDateIsNull(bookId)
-                .orElseThrow(() -> new IllegalStateException("Bu Kitap İçin Aktif Bir Ödünç Alma Bulunamadı " + bookId));
+                .orElseThrow(() -> new ActiveLoanNotFoundException(bookId));
 
 
         boolean isBorrower = loan.getUser().getUsername().equals(username);
