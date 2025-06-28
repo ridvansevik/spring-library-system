@@ -2,10 +2,7 @@ package com.ridvansevik.library_app.controller;
 
 
 import com.ridvansevik.library_app.dto.CreateUpdateBookDto;
-import com.ridvansevik.library_app.exception.ActiveLoanNotFoundException;
-import com.ridvansevik.library_app.exception.BookAlreadyBorrowedException;
-import com.ridvansevik.library_app.exception.BookIsOnLoanException;
-import com.ridvansevik.library_app.exception.ResourceNotFoundException;
+import com.ridvansevik.library_app.exception.*;
 import com.ridvansevik.library_app.mapper.DtoMapper;
 import com.ridvansevik.library_app.model.Book;
 import com.ridvansevik.library_app.service.BookService;
@@ -116,6 +113,8 @@ public class BookViewController {
         } catch (BookAlreadyBorrowedException e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Bu kitap zaten ödünç alınmış durumda.");
 
+        } catch (UserHasOverdueBooksOrUnpaidFinesException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Beklenmedik bir hata oluştu. Lütfen tekrar deneyin.");
         }
