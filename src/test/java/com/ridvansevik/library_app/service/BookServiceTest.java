@@ -1,11 +1,15 @@
 package com.ridvansevik.library_app.service;
 
+import com.ridvansevik.library_app.dto.CreateUpdateBookDto;
+import com.ridvansevik.library_app.exception.BookIsOnLoanException;
 import com.ridvansevik.library_app.model.Book;
 import com.ridvansevik.library_app.model.BookStatus;
 import com.ridvansevik.library_app.repository.BookRepository;
 import com.ridvansevik.library_app.exception.ResourceNotFoundException;
+import com.ridvansevik.library_app.repository.LoanRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -22,6 +26,8 @@ class BookServiceTest {
 
     @Mock
     private BookRepository bookRepository;
+    @Mock
+    private LoanRepository loanRepository;
 
     @InjectMocks
     private BookService bookService;
@@ -29,26 +35,37 @@ class BookServiceTest {
     @Test
     void createBook_shouldSaveAndReturnBook() {
         // Hazırlık (Arrange)
+        CreateUpdateBookDto bookDto = new CreateUpdateBookDto();
+        bookDto.setTitle("Test Başlık");
+        bookDto.setAuthor("Test Yazar");
+        bookDto.setIsbn("12345");
+
         Book bookToSave = new Book(null, "Test Başlık", "Test Yazar", "12345", BookStatus.AVAILABLE);
-        Book savedBook = new Book(1L, "Test Başlık", "Test Yazar", "12345",BookStatus.AVAILABLE);
-        when(bookRepository.save(bookToSave)).thenReturn(savedBook);
+        Book savedBook = new Book(1L, "Test Başlık", "Test Yazar", "12345", BookStatus.AVAILABLE);
+
+        // ArgumentCaptor ile save metoduna gönderilen Book nesnesini yakala
+        ArgumentCaptor<Book> bookArgumentCaptor = ArgumentCaptor.forClass(Book.class);
+        when(bookRepository.save(bookArgumentCaptor.capture())).thenReturn(savedBook);
 
         // Eylem (Act)
-        Book result = bookService.createBook(bookToSave);
+        Book result = bookService.createBook(bookDto);
 
         // Doğrulama (Assert)
         assertNotNull(result);
         assertEquals(1L, result.getId());
         assertEquals("Test Başlık", result.getTitle());
-        verify(bookRepository, times(1)).save(bookToSave); // save metodunun 1 kez çağrıldığını doğrula
+
+        // Yakalanan argümanın doğru değerlere sahip olduğunu kontrol et
+        assertEquals("Test Başlık", bookArgumentCaptor.getValue().getTitle());
+        assertEquals(BookStatus.AVAILABLE, bookArgumentCaptor.getValue().getBookStatus());
     }
 
     @Test
-    void deleteBook_whenBookExists_shouldDeleteBook() {
+    void deleteBook_whenBookExistsAndNotOnLoan_shouldDeleteBook() {
         // Hazırlık
         long bookId = 1L;
         when(bookRepository.existsById(bookId)).thenReturn(true);
-        // doNothing() mocklanan void metotlar için kullanılır.
+        when(loanRepository.existsByBookId(bookId)).thenReturn(false);
         doNothing().when(bookRepository).deleteById(bookId);
 
         // Eylem
@@ -59,9 +76,25 @@ class BookServiceTest {
     }
 
     @Test
-    void deleteBook_whenBookNotFound_shouldThrowResourceNotFoundException() {
+    void deleteBook_whenBookIsOnLoan_shouldThrowBookIsOnLoanException() {
         // Hazırlık
         long bookId = 1L;
+        when(bookRepository.existsById(bookId)).thenReturn(true);
+        when(loanRepository.existsByBookId(bookId)).thenReturn(true); // Kitap ödünçte
+
+        // Eylem ve Doğrulama
+        assertThrows(BookIsOnLoanException.class, () -> {
+            bookService.deleteBook(bookId);
+        });
+
+        // Kitap silinmemeli
+        verify(bookRepository, never()).deleteById(anyLong());
+    }
+
+    @Test
+    void deleteBook_whenBookNotFound_shouldThrowResourceNotFoundException() {
+        // Hazırlık
+        long bookId = 99L;
         when(bookRepository.existsById(bookId)).thenReturn(false);
 
         // Eylem ve Doğrulama
@@ -69,64 +102,53 @@ class BookServiceTest {
             bookService.deleteBook(bookId);
         });
 
-        // deleteById'nin hiç çağrılmadığını doğrula
-        verify(bookRepository, never()).deleteById(bookId);
+        verify(loanRepository, never()).existsByBookId(anyLong());
+        verify(bookRepository, never()).deleteById(anyLong());
     }
 
     @Test
     void updateBook_whenBookExists_shouldReturnUpdatedBook() {
-        // 1. HAZIRLIK (Arrange)
+        // Hazırlık
         long bookId = 1L;
-        // Güncelleme için kullanılacak yeni bilgileri içeren nesne
-        Book updatedDetails = new Book(null, "Yeni Başlık", "Yeni Yazar", "54321",BookStatus.AVAILABLE);
-        // Veritabanında varmış gibi davranacak mevcut kitap nesnesi
-        Book existingBook = new Book(bookId, "Eski Başlık", "Eski Yazar", "12345",BookStatus.AVAILABLE);
+        CreateUpdateBookDto updatedDetailsDto = new CreateUpdateBookDto();
+        updatedDetailsDto.setTitle("Yeni Başlık");
+        updatedDetailsDto.setAuthor("Yeni Yazar");
+        updatedDetailsDto.setIsbn("54321");
 
-        // Mockito'ya talimat veriyoruz:
-        // "bookRepository.findById(1L) metodu çağrıldığında, sanki veritabanında
-        // bulmuş gibi 'existingBook' nesnesini bir Optional içinde döndür."
+        Book existingBook = new Book(bookId, "Eski Başlık", "Eski Yazar", "12345", BookStatus.AVAILABLE);
         when(bookRepository.findById(bookId)).thenReturn(Optional.of(existingBook));
 
-        // "bookRepository.save() metodu çağrıldığında, güncellenmiş kitabı döndür."
-        // any(Book.class) ile herhangi bir Book nesnesi kaydedildiğinde dedik.
-        when(bookRepository.save(any(Book.class))).thenReturn(updatedDetails);
+        // save metodunun herhangi bir Book nesnesi ile çağrıldığında ne döndüreceğini ayarla
+        when(bookRepository.save(any(Book.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        // 2. EYLEM (Act)
-        // Test etmek istediğimiz asıl metodu çağırıyoruz.
-        Book result = bookService.updateBook(bookId, updatedDetails);
 
-        // 3. DOĞRULAMA (Assert)
-        // Dönen sonucun boş olmadığından ve beklediğimiz gibi olduğundan emin oluyoruz.
+        // Eylem
+        Book result = bookService.updateBook(bookId, updatedDetailsDto);
+
+        // Doğrulama
         assertNotNull(result);
-        assertEquals("Yeni Başlık", result.getTitle()); // Başlık güncellenmiş mi?
-        assertEquals("Yeni Yazar", result.getAuthor()); // Yazar güncellenmiş mi?
+        assertEquals("Yeni Başlık", result.getTitle());
+        assertEquals("Yeni Yazar", result.getAuthor());
+        assertEquals(BookStatus.AVAILABLE, result.getBookStatus()); // Durumun korunup korunmadığını kontrol et
 
-        // Davranış doğrulaması: Metodumuzun doğru işlemleri yaptığına emin olalım.
-        verify(bookRepository, times(1)).findById(bookId); // findById metodu tam olarak 1 kez çağrıldı mı?
-        verify(bookRepository, times(1)).save(any(Book.class)); // save metodu tam olarak 1 kez çağrıldı mı?
+        verify(bookRepository, times(1)).findById(bookId);
+        verify(bookRepository, times(1)).save(any(Book.class));
     }
 
     @Test
     void updateBook_whenBookNotFound_shouldThrowResourceNotFoundException() {
-        // 1. HAZIRLIK (Arrange)
+        // Hazırlık
         long nonExistentBookId = 99L;
-        Book updatedDetails = new Book(null, "Yeni Başlık", "Yeni Yazar", "54321",BookStatus.AVAILABLE);
+        CreateUpdateBookDto updatedDetailsDto = new CreateUpdateBookDto();
+        updatedDetailsDto.setTitle("Yeni Başlık");
 
-        // Mockito'ya talimat veriyoruz:
-        // "bookRepository.findById(99L) metodu çağrıldığında, sanki veritabanında
-        // bulamamış gibi boş bir Optional döndür."
         when(bookRepository.findById(nonExistentBookId)).thenReturn(Optional.empty());
 
-        // 2. EYLEM & 3. DOĞRULAMA (Act & Assert)
-        // assertThrows, belirli bir kod bloğunun beklenen hatayı fırlatıp fırlatmadığını kontrol eder.
-        // Eğer fırlatmazsa test başarısız olur.
+        // Eylem & Doğrulama
         assertThrows(ResourceNotFoundException.class, () -> {
-            // Bu kodun ResourceNotFoundException fırlatmasını bekliyoruz.
-            bookService.updateBook(nonExistentBookId, updatedDetails);
+            bookService.updateBook(nonExistentBookId, updatedDetailsDto);
         });
 
-        // Davranış doğrulaması: Kitap bulunamadığı için save metodunun
-        // HİÇ çağrılmamış olması gerekir.
         verify(bookRepository, never()).save(any(Book.class));
     }
 
