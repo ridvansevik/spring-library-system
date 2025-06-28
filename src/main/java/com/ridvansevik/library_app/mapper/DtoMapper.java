@@ -56,4 +56,12 @@ public LoanDto toLoanDto(Loan loan){
         return book;
     }
 
+    public CreateUpdateBookDto toCreateUpdateBookDto(Book book) {
+        if (book == null) return null;
+        CreateUpdateBookDto dto = new CreateUpdateBookDto();
+        dto.setTitle(book.getTitle());
+        dto.setAuthor(book.getAuthor());
+        dto.setIsbn(book.getIsbn());
+        return dto;
+    }
 }
