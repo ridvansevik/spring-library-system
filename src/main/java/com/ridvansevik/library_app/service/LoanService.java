@@ -4,6 +4,7 @@ package com.ridvansevik.library_app.service;
 import com.ridvansevik.library_app.exception.ActiveLoanNotFoundException;
 import com.ridvansevik.library_app.exception.BookAlreadyBorrowedException;
 import com.ridvansevik.library_app.exception.ResourceNotFoundException;
+import com.ridvansevik.library_app.exception.UserHasOverdueBooksOrUnpaidFinesException;
 import com.ridvansevik.library_app.model.*;
 import com.ridvansevik.library_app.repository.BookRepository;
 import com.ridvansevik.library_app.repository.LoanRepository;
@@ -12,7 +13,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.access.AccessDeniedException;
+
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Service
@@ -22,9 +26,14 @@ public class LoanService {
     private final BookRepository bookRepository;
     private final UserRepository userRepository;
     private final LoanRepository loanRepository;
-
+    private static final BigDecimal DAILY_FINE_RATE = new BigDecimal("1.00");
     @Transactional
     public Loan borrowBook(Long bookId,String username){
+        if (loanRepository.existsByUser_UsernameAndReturnDateIsNullAndDueDateBefore(username, LocalDate.now()) ||
+                loanRepository.existsByUser_UsernameAndFineAmountGreaterThan(username, BigDecimal.ZERO)) {
+            throw new UserHasOverdueBooksOrUnpaidFinesException(username);
+        }
+
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new ResourceNotFoundException("Kitap Bulunamadı" + bookId));
 
@@ -68,6 +77,13 @@ public class LoanService {
         bookRepository.save(book);
 
         loan.setReturnDate(LocalDate.now());
+
+        if (loan.getReturnDate().isAfter(loan.getDueDate())) {
+            long overdueDays = ChronoUnit.DAYS.between(loan.getDueDate(), loan.getReturnDate());
+            BigDecimal fine = DAILY_FINE_RATE.multiply(new BigDecimal(overdueDays));
+            loan.setFineAmount(fine);
+        }
+
         return loanRepository.save(loan);
     }
 
