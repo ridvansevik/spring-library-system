@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Data
@@ -29,6 +30,8 @@ public class Loan {
     private LocalDate dueDate;
 
     private LocalDate returnDate;
+
+    private BigDecimal fineAmount;
 
     public Loan(Book book,User user){
         this.book=book;
