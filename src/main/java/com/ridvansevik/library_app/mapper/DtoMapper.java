@@ -30,7 +30,7 @@ public BookDto toBookDto(Book book){
     bookDto.setBookStatus(book.getBookStatus());
     bookDto.setIsbn(book.getIsbn());
     bookDto.setAuthor(book.getAuthor());
-    bookDto.setTitle(book.getAuthor());
+    bookDto.setTitle(book.getTitle());
     return bookDto;
 }
 
