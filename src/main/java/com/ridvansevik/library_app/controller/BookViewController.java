@@ -1,6 +1,8 @@
 package com.ridvansevik.library_app.controller;
 
 
+import com.ridvansevik.library_app.dto.CreateUpdateBookDto;
+import com.ridvansevik.library_app.exception.BookIsOnLoanException;
 import com.ridvansevik.library_app.model.Book;
 import com.ridvansevik.library_app.service.BookService;
 import com.ridvansevik.library_app.service.LoanService;
@@ -10,6 +12,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
 import java.security.Principal;
 import java.util.List;
 import java.util.Map;
@@ -55,7 +59,11 @@ public class BookViewController {
 
     @PostMapping("/books/save")
     public String saveBook(@ModelAttribute("book") Book book){
-        bookService.createBook(book);
+        CreateUpdateBookDto createUpdateBookDto = new CreateUpdateBookDto();
+        createUpdateBookDto.setIsbn(book.getIsbn());
+        createUpdateBookDto.setTitle(book.getTitle());
+        createUpdateBookDto.setAuthor(book.getAuthor());
+        bookService.createBook(createUpdateBookDto);
         return "redirect:/web/books";
     }
 
@@ -69,32 +77,54 @@ public class BookViewController {
 
     @PostMapping("books/update/{id}")
     public String updateBook(@PathVariable Long id, @ModelAttribute("book") Book book){
-        bookService.updateBook(id,book);
+        CreateUpdateBookDto createUpdateBookDto = new CreateUpdateBookDto();
+        createUpdateBookDto.setAuthor(book.getAuthor());
+        createUpdateBookDto.setIsbn(book.getIsbn());
+        createUpdateBookDto.setTitle(book.getTitle());
+        bookService.updateBook(id,createUpdateBookDto);
         return "redirect:/web/books";
     }
 
-    @PostMapping("books/delete/{id}")
-    public String deleteBook(@PathVariable Long id){
-        bookService.deleteBook(id);
-        return "redirect:/web/books";
-    }
-
-
-    @PostMapping("books/borrow/{id}")
-    public String borrowBook(@PathVariable Long id,Principal principal){
-
-        if(principal != null){
-            loanService.borrowBook(id,principal.getName());
+    @PostMapping("/books/delete/{id}")
+    public String deleteBook(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            bookService.deleteBook(id);
+            // On success, add a success message to be displayed on the book list page.
+            redirectAttributes.addFlashAttribute("successMessage", "Kitap başarıyla silindi.");
+        } catch (BookIsOnLoanException e) {
+            // On failure (book is on loan), add the specific error message.
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        } catch (Exception e) {
+            // For any other unexpected errors.
+            redirectAttributes.addFlashAttribute("errorMessage", "Beklenmedik bir hata oluştu: " + e.getMessage());
         }
-
         return "redirect:/web/books";
-
     }
 
-    @PostMapping("books/return/{id}")
-    public String returnBook(@PathVariable Long id, Principal principal){
+
+
+    @PostMapping("/books/borrow/{id}")
+    public String borrowBook(@PathVariable Long id, Principal principal, RedirectAttributes redirectAttributes) {
         if (principal != null) {
-            loanService.returnBook(id, principal.getName());
+            try {
+                loanService.borrowBook(id, principal.getName());
+                redirectAttributes.addFlashAttribute("successMessage", "Kitap başarıyla ödünç alındı.");
+            } catch (Exception e) {
+                redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            }
+        }
+        return "redirect:/web/books";
+    }
+
+    @PostMapping("/books/return/{id}")
+    public String returnBook(@PathVariable Long id, Principal principal, RedirectAttributes redirectAttributes) {
+        if (principal != null) {
+            try {
+                loanService.returnBook(id, principal.getName());
+                redirectAttributes.addFlashAttribute("successMessage", "Kitap başarıyla iade edildi.");
+            } catch (Exception e) {
+                redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            }
         }
         return "redirect:/web/books";
     }
