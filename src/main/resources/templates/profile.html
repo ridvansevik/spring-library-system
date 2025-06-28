@@ -30,12 +30,11 @@
           <th>Son Teslim Tarihi</th>
           <th>İade Tarihi</th>
           <th>Durum</th>
-        </tr>
+          <th>Ceza Tutarı</th> </tr>
         </thead>
         <tbody>
         <tr th:if="${#lists.isEmpty(loans)}">
-          <td colspan="5" class="text-center">Daha önce hiç kitap ödünç almadınız.</td>
-        </tr>
+          <td colspan="6" class="text-center">Daha önce hiç kitap ödünç almadınız.</td> </tr>
         <tr th:each="loan : ${loans}">
           <td th:text="${loan.book.title}"></td>
           <td th:text="${loan.loanDate != null} ? ${#temporals.format(loan.loanDate, 'dd-MM-yyyy')} : '-'"></td>
@@ -45,6 +44,8 @@
             <span th:if="${loan.returnDate == null and loan.dueDate.isBefore(#temporals.createToday())}" class="badge bg-danger">Gecikmiş</span>
             <span th:if="${loan.returnDate == null and !loan.dueDate.isBefore(#temporals.createToday())}" class="badge bg-warning text-dark">Elimde</span>
             <span th:if="${loan.returnDate != null}" class="badge bg-success">İade Edildi</span>
+          </td>
+          <td th:text="${loan.fineAmount != null and loan.fineAmount > 0} ? ${#numbers.formatCurrency(loan.fineAmount)} : '-'">
           </td>
         </tr>
         </tbody>
