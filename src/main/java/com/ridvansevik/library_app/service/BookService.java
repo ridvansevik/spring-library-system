@@ -1,5 +1,6 @@
 package com.ridvansevik.library_app.service;
 
+import com.ridvansevik.library_app.dto.CreateUpdateBookDto;
 import com.ridvansevik.library_app.exception.BookIsOnLoanException;
 import com.ridvansevik.library_app.exception.ResourceNotFoundException;
 import com.ridvansevik.library_app.model.Book;
@@ -46,8 +47,12 @@ public class BookService {
      * @param book The Book entity to be saved.
      * @return The saved Book entity with its generated ID.
      */
-    public Book createBook(Book book) {
-        return bookRepository.save(book);
+    public Book createBook(CreateUpdateBookDto createUpdateBookDto) {
+        Book newBook = new Book();
+        newBook.setAuthor(createUpdateBookDto.getAuthor());
+        newBook.setTitle(createUpdateBookDto.getTitle());
+        newBook.setIsbn(createUpdateBookDto.getIsbn());
+        return bookRepository.save(newBook);
     }
 
     /**
@@ -58,15 +63,15 @@ public class BookService {
      * @return The updated and saved Book entity.
      * @throws ResourceNotFoundException if no book with the given ID is found.
      */
-    public Book updateBook(Long id, Book bookDetails) {
+    public Book updateBook(Long id, CreateUpdateBookDto createUpdateBookDto) {
         // Find the existing book or throw a specific exception if it doesn't exist.
         Book book = bookRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Book not found with id: " + id));
 
         // Update the fields of the existing book with the new details.
-        book.setTitle(bookDetails.getTitle());
-        book.setAuthor(bookDetails.getAuthor());
-        book.setIsbn(bookDetails.getIsbn());
+        book.setTitle(createUpdateBookDto.getTitle());
+        book.setAuthor(createUpdateBookDto.getAuthor());
+        book.setIsbn(createUpdateBookDto.getIsbn());
 
         // Save the updated book to the database.
         return bookRepository.save(book);
