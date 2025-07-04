@@ -16,55 +16,45 @@ public UserDto toUserDto(User user){
     if(user==null){
         return null;
     }
-    UserDto userDto = new UserDto();
-    userDto.setId(user.getId());
-    userDto.setRole(user.getRole());
-    userDto.setUsername(user.getUsername());
-    return userDto;
+    return new UserDto(user.getId(), user.getUsername(), user.getRole());
 }
 
 
 public BookDto toBookDto(Book book){
     if(book==null) return null;
-    BookDto bookDto = new BookDto();
-    bookDto.setId(book.getId());
-    bookDto.setBookStatus(book.getBookStatus());
-    bookDto.setIsbn(book.getIsbn());
-    bookDto.setAuthor(book.getAuthor());
-    bookDto.setTitle(book.getTitle());
-    return bookDto;
+
+    return new BookDto(book.getId(), book.getTitle(), book.getAuthor(), book.getIsbn(), book.getBookStatus());
 }
 
 public LoanDto toLoanDto(Loan loan){
     if(loan==null) return null;
-    LoanDto loanDto = new LoanDto();
-    loanDto.setBook(toBookDto(loan.getBook()));
-    loanDto.setId(loan.getId());
-    loanDto.setUser(toUserDto(loan.getUser()));
-    loanDto.setLoanDate(loan.getLoanDate());
-    loanDto.setDueDate(loan.getDueDate());
-    loanDto.setReturnDate(loan.getReturnDate());
-    loanDto.setFineAmount(loan.getFineAmount());
-    return loanDto;
+
+    return new LoanDto(loan.getId(), toBookDto(loan.getBook()),toUserDto(loan.getUser()),loan.getLoanDate(),loan.getDueDate(),loan.getReturnDate(),loan.getFineAmount());
 }
 
     public Book toBookEntity(CreateUpdateBookDto dto) {
         if (dto == null) return null;
+
         Book book = new Book();
-        book.setTitle(dto.getTitle());
-        book.setAuthor(dto.getAuthor());
-        book.setIsbn(dto.getIsbn());
+        book.setTitle(dto.title());
+        book.setAuthor(dto.author());
+        book.setIsbn(dto.isbn());
         return book;
     }
 
     public CreateUpdateBookDto toCreateUpdateBookDto(Book book) {
         if (book == null) return null;
-        CreateUpdateBookDto dto = new CreateUpdateBookDto();
-        dto.setTitle(book.getTitle());
-        dto.setAuthor(book.getAuthor());
-        dto.setIsbn(book.getIsbn());
-        return dto;
+
+        return new CreateUpdateBookDto(book.getTitle(),book.getAuthor(), book.getIsbn());
     }
 
+    public void updateBookFromDto(CreateUpdateBookDto dto, Book book) {
+        if (dto == null || book == null) {
+            return;
+        }
+        book.setTitle(dto.title());
+        book.setAuthor(dto.author());
+        book.setIsbn(dto.isbn());
+    }
 
 }
