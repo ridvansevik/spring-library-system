@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org" th:fragment="layout(title, content)" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <title th:replace="${title}">Kütüphane Sistemi</title>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #1a1a1a;
+            background-image: radial-gradient(circle at 1px 1px, #444 1px, transparent 0);
+            background-size: 20px 20px;
+        }
+        .navbar {
+            background-color: rgba(33, 37, 41, 0.85);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #333;
+        }
+        .navbar-brand {
+            font-weight: 600;
+        }
+        .footer {
+            background-color: #212529;
+            border-top: 1px solid #333;
+            color: #adb5bd;
+            padding: 1.5rem 0;
+            margin-top: auto; /* Push footer to bottom */
+        }
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        main {
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg sticky-top">
+    <div class="container-fluid">
+        <a class="navbar-brand" th:href="@{/web/books}">
+            <i class="bi bi-book-half"></i>
+            Kütüphane
+        </a>
+    </div>
+</nav>
+
+<main class="container mt-5 mb-5">
+    <div th:replace="${content}">
+    </div>
+</main>
+
+<footer class="footer text-center">
+    <div class="container">
+        <p class="mb-0">&copy; 2025 Kütüphane Sistemi. Tüm hakları saklıdır.</p>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -3,19 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Kayıt Ol</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Kayıt Ol | Kütüphane Sistemi</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
         body {
+            font-family: 'Poppins', sans-serif;
             display: flex;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            background-color: #212529;
+            background-color: #1a1a1a;
+            background-image: radial-gradient(circle at 1px 1px, #444 1px, transparent 0);
+            background-size: 20px 20px;
         }
         .register-card {
             max-width: 500px;
             width: 100%;
+            background-color: rgba(33, 37, 41, 0.85);
+            backdrop-filter: blur(10px);
+            border: 1px solid #444;
+            border-radius: 15px;
+        }
+        .form-control {
+            background-color: #2a2a2a;
+            border-color: #444;
+        }
+        .form-control:focus {
+            background-color: #2a2a2a;
+            border-color: #0dcaf0;
+            box-shadow: 0 0 0 0.25rem rgba(13, 202, 240, 0.25);
         }
     </style>
 </head>
@@ -25,12 +45,18 @@
         <div class="col-md-6">
             <div class="card register-card shadow-lg">
                 <div class="card-body p-5">
-                    <h2 class="card-title text-center mb-4">Yeni Kullanıcı Kaydı</h2>
-
-                    <div th:if="${param.success}" class="alert alert-success mt-3">
-                        Kayıt başarılı! Şimdi giriş yapabilirsiniz.
+                    <div class="text-center mb-4">
+                        <i class="bi bi-person-plus-fill fs-1 text-info"></i>
+                        <h2 class="card-title mt-2">Yeni Kullanıcı Kaydı</h2>
+                        <p class="text-muted">Kütüphane sistemine katılın</p>
                     </div>
-                    <div th:if="${errorMessage}" class="alert alert-danger mt-3" th:text="${errorMessage}"></div>
+
+                    <div th:if="${param.success}" class="alert alert-success">
+                        <i class="bi bi-check-circle-fill"></i> Kayıt başarılı! Şimdi giriş yapabilirsiniz.
+                    </div>
+                    <div th:if="${errorMessage}" class="alert alert-danger">
+                        <i class="bi bi-exclamation-triangle-fill"></i> <span th:text="${errorMessage}"></span>
+                    </div>
 
                     <form th:action="@{/web/register/save}" th:object="${user}" method="post" class="mt-4">
                         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
@@ -44,8 +70,8 @@
                             <input type="password" id="password" th:field="*{password}" class="form-control" required>
                         </div>
                         <div class="d-grid gap-2 mt-4">
-                            <button type="submit" class="btn btn-primary">Kayıt Ol</button>
-                            <a th:href="@{/web/login}" class="btn btn-outline-secondary">Giriş Sayfasına Dön</a>
+                            <button type="submit" class="btn btn-info">Kayıt Ol</button>
+                            <a th:href="@{/web/login}" class="btn btn-outline-light">Giriş Sayfasına Dön</a>
                         </div>
                     </form>
                 </div>
