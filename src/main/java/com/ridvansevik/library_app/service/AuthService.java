@@ -29,16 +29,16 @@ public class AuthService {
     public User register(RegisterDto registerDto) {
 
         // Check if a user with the given username already exists to prevent duplicates.
-        userRepository.findByUsername(registerDto.username()).ifPresent(user -> {
-            throw new UsernameAlreadyExistsException(registerDto.username());
+        userRepository.findByUsername(registerDto.getUsername()).ifPresent(user -> {
+            throw new UsernameAlreadyExistsException(registerDto.getUsername());
         });
 
         // Encode the user's plain-text password for secure storage.
-        String encodedPassword = passwordEncoder.encode(registerDto.password());
+        String encodedPassword = passwordEncoder.encode(registerDto.getPassword());
 
         // Create a new User entity with the provided details and a default role.
         User newUser = new User(
-                registerDto.username(),
+                registerDto.getUsername(),
                 encodedPassword,
                 Role.ROLE_USER
         );
