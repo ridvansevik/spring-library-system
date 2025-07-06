@@ -10,6 +10,8 @@ import com.ridvansevik.library_app.service.LoanService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -30,7 +32,7 @@ public class BookViewController {
     private final LoanService loanService;
     private final DtoMapper dtoMapper;
     @GetMapping("/books")
-    public String getAllBooks(@RequestParam(required = false)String keyword, Model model , Principal principal, Pageable pageable){
+    public String getAllBooks(@RequestParam(required = false)String keyword, Model model , Principal principal,   @PageableDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable){
 
         if(principal != null){
             model.addAttribute("username", principal.getName());
