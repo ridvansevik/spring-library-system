@@ -17,10 +17,10 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        if (userRepository.findByUsername("admin").isEmpty()) {
+        if (userRepository.findByUsername("admin1").isEmpty()) {
             User admin = new User(
-                    "admin",
-                    passwordEncoder.encode("VerySecretPassword"),
+                    "admin1",
+                    passwordEncoder.encode("haha"),
                     Role.ROLE_ADMIN
             );
             userRepository.save(admin);
